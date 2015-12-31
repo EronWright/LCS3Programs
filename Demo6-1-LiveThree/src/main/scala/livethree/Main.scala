@@ -182,7 +182,7 @@ class Environment() extends EnvironmentLike[Double] {
 
   private val outputQuantity = outputQuantitySource.switch
 
-  val feedbackGain = BehaviorSubject[Double](1.0)
+  val feedbackGain = BehaviorSubject[Double](10.0)
 
   private val feedbackEffect = outputQuantity.combineLatestWith(feedbackGain) { (o, g) => o * g }
 
