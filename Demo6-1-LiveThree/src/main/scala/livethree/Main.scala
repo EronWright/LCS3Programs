@@ -20,6 +20,9 @@ object Parameters {
   val outputQuantityRange = (-10000.0, 10000.0)
 }
 
+/**
+  * @author Eron Wright
+  */
 object Main extends App {
 
   import Parameters._
