@@ -2,12 +2,6 @@
 ## Program Output
 
 ```
-/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/bin/java -Didea.launcher.port=7534 "-Didea.launcher.bin.path=/Applications/IntelliJ IDEA 15.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath "/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/packager.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/lib/tools.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Users/eron/Projects/LCS3Programs/Demo6-1-LiveThree/target/scala-2.10/classes:/Users/eron/.ivy2/cache/io.reactivex/rxjava/jars/rxjava-1.0.17.jar:/Users/eron/.ivy2/cache/io.reactivex/rxscala_2.10/jars/rxscala_2.10-0.25.1.jar:/Users/eron/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.10.6.jar:/Users/eron/.ivy2/cache/io.reactivex/rxjava-debug/jars/rxjava-debug-1.0.3.jar:/Applications/IntelliJ IDEA 15.app/Contents/lib/idea_rt.jar" com.intellij.rt.execution.application.AppMain livethree.Main
-initializing...
-weights = Vector(0.7766196716203877, 0.017345576730016393, 0.6297309081029326)
-weights = Vector(0.061701701859827894, 0.9874922225581205, 0.14509310932923208)
-weights = Vector(0.4283879848578723, 0.23672592316444732, 0.8720347308056897)
-running...
 --------------------------------------------------
 setting reference levels to (10.0, -5.0, 1.0)
 environment 1: outputQuantity=-0.17, disturbance=0.00, inputQuantity=-1.72
@@ -652,6 +646,9 @@ environment 2: outputQuantity=0.04, disturbance=0.00, inputQuantity=0.44
 controller 2:  perceptualSignal=1.17, referenceSignal=1.00, errorSignal=-0.17, outputQuantity=-0.01
 controller 2:  perceptualSignal=0.85, referenceSignal=1.00, errorSignal=-0.17, outputQuantity=-0.01
 controller 2:  perceptualSignal=0.85, referenceSignal=1.00, errorSignal=0.15, outputQuantity=-0.01
+```
+
+```
 --------------------------------------------------
 adding disturbances (-10.0, 10.0, 0.0)
 environment 0: outputQuantity=1.19, disturbance=-10.00, inputQuantity=11.63
@@ -1385,7 +1382,5 @@ environment 2: outputQuantity=0.06, disturbance=0.00, inputQuantity=0.53
 controller 2:  perceptualSignal=0.96, referenceSignal=1.00, errorSignal=0.04, outputQuantity=0.01
 controller 2:  perceptualSignal=0.96, referenceSignal=1.00, errorSignal=0.04, outputQuantity=0.01
 controller 2:  perceptualSignal=0.96, referenceSignal=1.00, errorSignal=0.04, outputQuantity=0.01
-
-Process finished with exit code 130
-
+...
 ```
