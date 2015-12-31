@@ -1,17 +1,11 @@
 package livethree
 
-import java.util
-
-import rx.plugins.{DebugNotification, DebugNotificationListener, DebugHook, RxJavaPlugins}
-
-import scala.collection.JavaConversions._
+import rx.lang.scala._
+import rx.lang.scala.subjects.BehaviorSubject
+import rx.plugins.{DebugNotification, DebugNotificationListener}
 
 import scala.concurrent.duration._
 import scala.math._
-
-import rx.lang.scala._
-import rx.lang.scala.subjects.BehaviorSubject
-
 import scala.util.Random
 
 object Parameters {
@@ -20,7 +14,7 @@ object Parameters {
   val numEnvironmentVariables = 3
 
   val dt = 1/60.0
-  val inputDelay = (0.133 seconds) //(0.133 seconds)
+  val inputDelay = (0.133 seconds)
   val debounceTime = (0.133 seconds)
   val errorSignalRange = (-1000.0, 1000.0)
   val outputQuantityRange = (-10000.0, 10000.0)
@@ -32,88 +26,60 @@ object Main extends App {
 
   object Listener extends DebugNotificationListener[String] {
 
-    //val labels = scala.collection.mutable.HashMap.empty[AnyRef, String]
-    val labels = new util.IdentityHashMap[AnyRef, String]()
-    def label(o: AnyRef) = labels.getOrElse(o, o.toString)
-
-    var counter: Long = 0
-
     override def start[T](n: DebugNotification[T]): String = {
-      //println(s"start: ${n}")
-      n.getKind match {
-        case DebugNotification.Kind.Subscribe =>
-          println(n)
-         // println(s"subscribe: source=${label(n.getSource)} observer=${label(n.getObserver)}")
-        case _ => //println(n.toString)
-      }
-
+      println(s"(debug) start: ${n}")
       "continue"
     }
 
     override def onNext[T](n: DebugNotification[T]): T = {
-      counter = counter + 1
+      println(s"(debug) onNext: ${n}")
       super.onNext(n)
-    }
-
-    implicit class DebugObservable[T](o: Observable[T]) {
-      def labeled(s: String) = {
-        Listener.labels += (o -> s)
-        o
-      }
     }
   }
 
   //RxJavaPlugins.getInstance().registerObservableExecutionHook(new DebugHook(Listener))
 
+  println("initializing...")
   val environmentVariables = (0 until numEnvironmentVariables).map { idx =>
-    val environment = new EnvironmentSimple()
-    //environment.disturbance.subscribe { (i) => println(s"environment $idx says: disturbance = $i") }
-    //environment.inputQuantity.subscribe { (i) => println(s"environment $idx says: inputQuantity = $i") }
+    val environment = new Environment()
+    environment.debugObserver.subscribe { (i) => println(s"environment $idx: $i") }
     environment
   }.toArray
-  println("env initialized")
-
-  //println("observing environment signals...")
-  //val environment = environmentVariables(0)
 
   val controllers = (0 until numControllers).map { idx =>
     val controller = new MultiDimensionalController(environmentVariables)
-    //controller.Qo.subscribe { (i) => println(s"controller $idx says: Qo = $i") }
 
-    controller.controller.perceptualSignal.subscribe { (i) => println(s"controller $idx says: perceptualSignal = $i") }
-    //controller.controller.referenceSignal.subscribe { (i) => println(s"controller $idx says: referenceSignal = $i") }
-    //controller.controller.errorSignal.subscribe { (i) => println(s"controller $idx says: errorSignal = $i") }
-    //controller.controller.outputQuantity.subscribe { (i) => println(s"controller $idx says: outputQuantity = $i") }
+    // set the initial weights to be mostly independent for test purposes
+    idx match {
+      case 0 => controller.setWeights(Vector(0.9,0.1,0.1))
+      case 1 => controller.setWeights(Vector(0.1,0.9,0.1))
+      case 2 => controller.setWeights(Vector(0.1,0.1,0.9))
+      case _ =>
+    }
+
+    controller.controller.debugObserver.subscribe { (i) => println(s"controller $idx: $i") }
     controller
   }
-  println("controllers initialized")
 
-  println("wire-up")
   (0 until numEnvironmentVariables).map { idx =>
     val Qo = new MultiDimensionalEnvironmentVariable(idx, controllers)
     environmentVariables(idx).connectTo(Qo.outputQuantity)
   }
 
-  println("observing controller signals...")
+  println("running...")
 
-  //println("--------------------------------------------------")
-  //controller.referenceSignal.onNext(0.0)
-  //Thread.sleep((5 second).toMillis)
 
   println("--------------------------------------------------")
+  println("setting reference levels")
   controllers(0).controller.referenceSignal.onNext(5.0)
   controllers(1).controller.referenceSignal.onNext(-5.0)
+  controllers(2).controller.referenceSignal.onNext(1.0)
+
   Thread.sleep((15 second).toMillis)
 
   println("--------------------------------------------------")
-  controllers(2).controller.referenceSignal.onNext(-5.0)
-
-//  println("--------------------------------------------------")
-//  controllers(0).controller.referenceSignal.onNext(0.0)
-//  Thread.sleep((5 second).toMillis)
-//
-//  println("--------------------------------------------------")
-//  environmentVariables(0).disturbance.onNext(10.0)
+  println("adding disturbances")
+  environmentVariables(0).disturbance.onNext(-10)
 
   readLine
 }
@@ -131,7 +97,6 @@ class MultiDimensionalEnvironmentVariable(
     .toSubject(0.0)
 
   outputQuantity.subscribe()
-
 }
 
 class MultiDimensionalController(envVariables: Seq[EnvironmentLike[Double]])
@@ -145,7 +110,10 @@ class MultiDimensionalController(envVariables: Seq[EnvironmentLike[Double]])
     val w = envVariables.map(_ => (Random.nextDouble)).toVector.norm()
 
     println(s"weights = $w")
+    setWeights(w)
+  }
 
+  def setWeights(w: Vector[Double]): Unit = {
     // note that this is not atomic; Wi will change before Wo
     Wi.onNext(w)
     Wo.onNext(w)
@@ -161,18 +129,11 @@ class MultiDimensionalController(envVariables: Seq[EnvironmentLike[Double]])
 
   val Qo = controller.outputQuantity
     .serialize
-    //.distinctUntilChanged
     .toSubject(0.0)
-
-
-  //Qo.subscribe { (i) => println(s"controller says: Qo = $i") }
-
 }
 
 class Controller(val inputQuantity: Observable[Double])
 extends ControllerLike[Double] {
-
-  import Main.Listener._
   import Parameters._
 
   val inputGain = BehaviorSubject[Double](1.0)
@@ -188,7 +149,6 @@ extends ControllerLike[Double] {
   val errorSignal = referenceSignal
     .combineLatestWith(perceptualSignal) { (r, p) => r - p }
     .map { e => max(errorSignalRange._1, min(e, errorSignalRange._2)) }
-    //.filter { e => abs(e) >= 0.1 } // damping
 
   val outputGain = BehaviorSubject[Double](100.0)
 
@@ -203,43 +163,41 @@ extends ControllerLike[Double] {
     }
     .map { e => max(outputQuantityRange._1, min(e, outputQuantityRange._2)) }
     .share
-    .labeled("outputQuantity")
-}
 
-class EnvironmentSimple() extends EnvironmentLike[Double] {
-  import Main.Listener._
-  import Parameters._
-
-  val outputQuantitySource = BehaviorSubject[Observable[Double]]() // BehaviorSubject(Observable.just(0.0))
-
-  def connectTo(o: Observable[Double]) = {
-    outputQuantitySource.onNext(o)
-  }
-
-  val inputQuantity = outputQuantitySource.switch
-    .debounce(debounceTime)
+  case class DebugOutput(perceptualSignal: Double, referenceSignal: Double, errorSignal: Double, outputQuantity: Double)
+  val debugObserver = Observable
+    .combineLatest(Seq(perceptualSignal, referenceSignal, errorSignal, outputQuantity)) { v =>
+      new DebugOutput(v(0),v(1),v(2),v(3))
+    }
 }
 
 class Environment() extends EnvironmentLike[Double] {
+  import Parameters._
 
-  val outputQuantitySource = BehaviorSubject[Observable[Double]]() // BehaviorSubject(Observable.just(0.0))
+  private val outputQuantitySource = BehaviorSubject[Observable[Double]]()
 
   def connectTo(o: Observable[Double]) = {
     outputQuantitySource.onNext(o)
   }
 
-  val outputQuantity = outputQuantitySource.switch
+  private val outputQuantity = outputQuantitySource.switch
 
   val feedbackGain = BehaviorSubject[Double](1.0)
 
-  val feedbackEffect = outputQuantity.combineLatestWith(feedbackGain) { (o, g) => o * g }
+  private val feedbackEffect = outputQuantity.combineLatestWith(feedbackGain) { (o, g) => o * g }
 
   val disturbance = BehaviorSubject[Double](0.0)
 
   val inputQuantity = feedbackEffect
     .combineLatestWith(disturbance) { (f, d) => f + d }
-    //.distinctUntilChanged
-    .toSubject(0.0)
+    .share
+    .debounce(debounceTime)
+
+  case class DebugOutput(outputQuantity: Double, disturbance: Double, inputQuantity: Double)
+  val debugObserver = Observable
+    .combineLatest(Seq(outputQuantity, disturbance, inputQuantity)) { v =>
+      new DebugOutput(v(0),v(1),v(2))
+    }
 }
 
 trait ControllerLike[T] {
