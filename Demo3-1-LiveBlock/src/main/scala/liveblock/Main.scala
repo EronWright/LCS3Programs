@@ -8,28 +8,24 @@ import rx.lang.scala.subjects.BehaviorSubject
 
 object Main extends App {
 
-  var outputQuantity: Observable[Double] = null
-
-  var controller: Controller = null
-
-  val environment = new Environment(Observable.defer {
-    println(s"environment subscribed to outputQuantity")
-    controller.outputQuantity
-  })
+  val environment = new Environment()
   println("env up")
 
   val publishedInputQuantity = environment.inputQuantity.doOnSubscribe {
     println("controller subscribed to inputQuantity")
   }.publish
 
-  controller = new Controller(publishedInputQuantity.doOnSubscribe {
+  println("observing environment signals...")
+  environment.disturbance.subscribe { (i) => println(s"environment says: disturbance = $i") }
+  environment.inputQuantity.subscribe { (i) => println(s"environment says: inputQuantity = $i") }
+
+  val controller = new Controller(publishedInputQuantity.doOnSubscribe {
     println("controller subscribed to publishedInputQuantity")
   })
   println("controller up")
 
-  println("observing environment signals...")
-  environment.disturbance.subscribe { (i) => println(s"environment says: disturbance = $i") }
-  environment.inputQuantity.subscribe { (i) => println(s"environment says: inputQuantity = $i") }
+  println("wire-up")
+  environment.connectTo(controller.outputQuantity)
 
   println("observing controller signals...")
   controller.perceptualSignal.subscribe { (i) => println(s"controller says: perceptualSignal = $i") }
@@ -96,7 +92,11 @@ class Controller(val inputQuantity: Observable[Double]) extends ControllerLike[D
     .map { e => max(outputQuantityRange._1, min(e, outputQuantityRange._2)) }
 }
 
-class Environment(val outputQuantity: Observable[Double]) extends EnvironmentLike[Double] {
+class Environment() extends EnvironmentLike[Double] {
+
+  val outputQuantitySource = BehaviorSubject(Observable.just(0.0))
+
+  val outputQuantity = outputQuantitySource.switch
 
   val feedbackGain = BehaviorSubject[Double](10.0)
 
@@ -106,6 +106,9 @@ class Environment(val outputQuantity: Observable[Double]) extends EnvironmentLik
 
   val inputQuantity = feedbackEffect.combineLatestWith(disturbance) { (f, d) => f + d }
 
+  def connectTo(o: Observable[Double]) = {
+    outputQuantitySource.onNext(o)
+  }
 }
 
 trait ControllerLike[T] {
