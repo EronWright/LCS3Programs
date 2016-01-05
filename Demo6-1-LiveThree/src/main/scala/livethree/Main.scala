@@ -45,7 +45,9 @@ object Main extends App {
   println("initializing...")
   val environmentVariables = (0 until numEnvironmentVariables).map { idx =>
     val environment = new Environment()
-    environment.debugObserver.subscribe { (i) => println(s"environment $idx: $i") }
+    environment.debugObserver.subscribe { (i) =>
+      println(f"environment $idx: outputQuantity=${i.outputQuantity}%.2f, disturbance=${i.disturbance}%.2f, inputQuantity=${i.inputQuantity}%.2f")
+    }
     environment
   }.toArray
 
@@ -54,13 +56,15 @@ object Main extends App {
 
     // set the initial weights to be mostly independent for test purposes
     idx match {
-      case 0 => controller.setWeights(Vector(0.9,0.1,0.1))
-      case 1 => controller.setWeights(Vector(0.1,0.9,0.1))
-      case 2 => controller.setWeights(Vector(0.1,0.1,0.9))
+      case 0 => controller.setWeights(Vector(0.9,0.2,0.1))
+      case 1 => controller.setWeights(Vector(0.2,0.9,0.1))
+      case 2 => controller.setWeights(Vector(0.3,0.2,0.9))
       case _ =>
     }
 
-    controller.controller.debugObserver.subscribe { (i) => println(s"controller $idx: $i") }
+    controller.controller.debugObserver.subscribe { (i) =>
+      println(f"controller $idx:  perceptualSignal=${i.perceptualSignal}%.2f, referenceSignal=${i.referenceSignal}%.2f, errorSignal=${i.errorSignal}%.2f, outputQuantity=${i.outputQuantity}%.2f")
+    }
     controller
   }
 
@@ -73,16 +77,17 @@ object Main extends App {
 
 
   println("--------------------------------------------------")
-  println("setting reference levels")
-  controllers(0).controller.referenceSignal.onNext(5.0)
+  println("setting reference levels to (10.0, -5.0, 1.0)")
+  controllers(0).controller.referenceSignal.onNext(10.0)
   controllers(1).controller.referenceSignal.onNext(-5.0)
   controllers(2).controller.referenceSignal.onNext(1.0)
 
-  Thread.sleep((15 second).toMillis)
+  Thread.sleep((5 second).toMillis)
 
   println("--------------------------------------------------")
-  println("adding disturbances")
-  environmentVariables(0).disturbance.onNext(-10)
+  println("adding disturbances (-10.0, 10.0, 0.0)")
+  environmentVariables(0).disturbance.onNext(-10.0)
+  environmentVariables(1).disturbance.onNext(10.0)
 
   readLine
 }
